@@ -161,34 +161,38 @@ function renderEmptyState() {
   lucide.createIcons();
 }
 
-// Copy sharing URL with encoded state
+// Copy the view URL — anyone with this link sees the live schedule from the server
 shareUrlBtn.addEventListener('click', () => {
   if (activeSchedule.length === 0) {
     showToast("Nothing to share! Build a schedule first.", "error");
     return;
   }
 
-  try {
-    const jsonString = JSON.stringify(activeSchedule);
-    const base64Encoded = btoa(encodeURIComponent(jsonString));
-    
-    // Construct the URL with query parameter `s`
-    const shareUrl = `${window.location.origin}${window.location.pathname}?s=${base64Encoded}`;
-    
-    navigator.clipboard.writeText(shareUrl).then(() => {
-      showToast("Shareable link copied to clipboard!");
-    }).catch(err => {
-      console.error('Failed to copy text: ', err);
-      showToast("Could not copy link. Manually copy the address bar.", "error");
-    });
-  } catch (error) {
-    console.error('Encoding error: ', error);
-    showToast("Error creating shareable link.", "error");
-  }
+  const shareUrl = `${window.location.origin}/view`;
+
+  navigator.clipboard.writeText(shareUrl).then(() => {
+    showToast("View link copied to clipboard!");
+  }).catch(() => {
+    showToast("Could not copy link. Manually copy the address bar.", "error");
+  });
 });
 
+// Load today's schedule from the Supabase-backed API
+async function loadFromAPI() {
+  try {
+    const response = await fetch('/api/schedule');
+    if (!response.ok) throw new Error(`API responded ${response.status}`);
+    const data = await response.json();
+    activeSchedule = data.entries || [];
+  } catch (error) {
+    console.error('Failed to load schedule from API:', error);
+    activeSchedule = [];
+    showToast("Could not load schedule from server.", "error");
+  }
+}
+
 // App initialization
-function init() {
+async function init() {
   initTheme();
   
   // 1. Set local day in Sydney/Melbourne timezone
@@ -199,50 +203,22 @@ function init() {
   const shareData = urlParams.get('s');
 
   if (shareData) {
+    // Decode a legacy encoded share parameter
     try {
-      // Decode share parameter
       const jsonString = decodeURIComponent(atob(shareData));
       activeSchedule = JSON.parse(jsonString);
-      
-      // Cache in localStorage as backup
-      localStorage.setItem('whatprogramstoday_schedule', jsonString);
-      
       showToast("Loaded shared schedule!");
     } catch (e) {
       console.error('Failed to parse shared URL schedule data:', e);
       showToast("Shared link was invalid. Loading saved schedule instead.", "error");
-      loadFromLocalStorage();
+      await loadFromAPI();
     }
   } else {
-    loadFromLocalStorage();
+    await loadFromAPI();
   }
 
   // 3. Render grouped cards
   processAndRenderSchedule();
-}
-
-function loadFromLocalStorage() {
-  const savedDate = localStorage.getItem('whatprogramstoday_date');
-  const todayDate = getSydneyDateString();
-
-  // If stored date doesn't match today (Sydney time), it's stale — clear it
-  if (savedDate && savedDate !== todayDate) {
-    localStorage.removeItem('whatprogramstoday_schedule');
-    localStorage.removeItem('whatprogramstoday_date');
-    activeSchedule = [];
-    return;
-  }
-
-  const savedSchedule = localStorage.getItem('whatprogramstoday_schedule');
-  if (savedSchedule) {
-    try {
-      activeSchedule = JSON.parse(savedSchedule);
-    } catch (e) {
-      activeSchedule = [];
-    }
-  } else {
-    activeSchedule = [];
-  }
 }
 
 // Expose navigateToHome globally for empty state button

@@ -304,7 +304,7 @@ addMoreBtn.addEventListener('click', () => {
 });
 
 // Form submit action (Publish & Redirect)
-submitScheduleBtn.addEventListener('click', () => {
+submitScheduleBtn.addEventListener('click', async () => {
   // If user has filled the inputs but hasn't clicked "Add to Schedule" yet,
   // we auto-add it so they don't lose that entry!
   const schoolVal = schoolInput.value.trim();
@@ -323,16 +323,38 @@ submitScheduleBtn.addEventListener('click', () => {
     return;
   }
 
-  // Save list to localStorage, tagged with today's Sydney date
-  localStorage.setItem('whatprogramstoday_schedule', JSON.stringify(currentSchedule));
-  localStorage.setItem('whatprogramstoday_date', getSydneyDateString());
+  // Show loading state on button
+  submitScheduleBtn.disabled = true;
+  submitScheduleBtn.innerHTML = `<i data-lucide="loader-2"></i> Publishing...`;
+  lucide.createIcons();
 
-  showToast("Schedule published! Redirecting...", "info");
-  
-  // Navigate to view
-  setTimeout(() => {
-    navigateToView();
-  }, 1000);
+  try {
+    // POST schedule to the Supabase-backed API
+    const response = await fetch('/api/schedule', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        date: getSydneyDateString(),
+        entries: currentSchedule
+      })
+    });
+
+    if (!response.ok) {
+      const err = await response.json().catch(() => ({}));
+      throw new Error(err.error || 'Publish failed');
+    }
+
+    showToast("Schedule published! Redirecting...", "info");
+    setTimeout(() => navigateToView(), 1000);
+
+  } catch (error) {
+    console.error('Publish error:', error);
+    showToast(error.message || "Could not publish. Check your connection and try again.", "error");
+    // Restore button
+    submitScheduleBtn.disabled = false;
+    submitScheduleBtn.innerHTML = `<i data-lucide="check-circle-2"></i> Publish &amp; View`;
+    lucide.createIcons();
+  }
 });
 
 // App Initialization
@@ -341,28 +363,22 @@ async function init() {
   await loadSourceData();
   setupDropdown(schoolCombobox, schoolInput, schoolDropdown, schoolsList);
   setupDropdown(programCombobox, programInput, programDropdown, programsList);
-  
-  // Load any existing schedule — but only if it was saved today (Sydney time).
-  // If it's from a previous day, clear it so we start fresh.
-  const savedDate = localStorage.getItem('whatprogramstoday_date');
-  const todayDate = getSydneyDateString();
 
-  if (savedDate && savedDate !== todayDate) {
-    // It's a new day — discard yesterday's schedule
-    localStorage.removeItem('whatprogramstoday_schedule');
-    localStorage.removeItem('whatprogramstoday_date');
-    currentSchedule = [];
-    showToast("New day detected — starting with a fresh schedule!", "info");
-  } else {
-    const savedSchedule = localStorage.getItem('whatprogramstoday_schedule');
-    if (savedSchedule) {
-      try {
-        currentSchedule = JSON.parse(savedSchedule);
+  // Try to resume today's schedule from the server so the builder can
+  // pick up where it left off after a page refresh.
+  // Silently ignored when running locally via file:// (no API available).
+  try {
+    const response = await fetch('/api/schedule');
+    if (response.ok) {
+      const data = await response.json();
+      if (data.entries && data.entries.length > 0) {
+        currentSchedule = data.entries;
         renderScheduleList();
-      } catch (e) {
-        currentSchedule = [];
+        showToast("Resumed today's saved schedule", "info");
       }
     }
+  } catch (e) {
+    // API not available (e.g. file:// local mode) — start with empty schedule
   }
 }
 
