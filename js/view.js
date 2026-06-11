@@ -4,7 +4,6 @@ const cardsGrid = document.getElementById('cards-grid');
 
 const viewBackBtn = document.getElementById('view-back-btn');
 const backToHomeLogo = document.getElementById('back-to-home-logo');
-const shareUrlBtn = document.getElementById('share-url-btn');
 
 const themeSwitch = document.getElementById('theme-switch');
 const themeText = document.getElementById('theme-text');
@@ -160,22 +159,6 @@ function renderEmptyState() {
   `;
   lucide.createIcons();
 }
-
-// Copy the view URL — anyone with this link sees the live schedule from the server
-shareUrlBtn.addEventListener('click', () => {
-  if (activeSchedule.length === 0) {
-    showToast("Nothing to share! Build a schedule first.", "error");
-    return;
-  }
-
-  const shareUrl = `${window.location.origin}/view`;
-
-  navigator.clipboard.writeText(shareUrl).then(() => {
-    showToast("View link copied to clipboard!");
-  }).catch(() => {
-    showToast("Could not copy link. Manually copy the address bar.", "error");
-  });
-});
 
 // Load today's schedule from the Supabase-backed API
 async function loadFromAPI() {
