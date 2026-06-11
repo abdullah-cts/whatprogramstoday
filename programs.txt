@@ -1,8 +1,45 @@
-Science Camp
-Robotics Workshop
-Coding Bootcamp
-Space Exploration
-Marine Biology
-Mathematics Challenge
-Creative Writing
-Outdoor Leadership
+Voyager - Epidemiology
+Voyager - Fuelling creativity through AI
+Voyager - LED Lightbox
+Voyager - Media Impact
+Voyager - Mining Mars with robots
+Voyager - Microscopic art
+Voyager Solar Sparks
+Voyager - Sports tech
+Voyager - Sustainable Housing
+Voyager - Voxel art
+Other
+Bespoke Biology
+Systems Engineering
+VCE Art - Art reimagined through technology
+VCE Art - Microscopic Art
+VCE Biology - Antibacterial testing
+VCE Biology - Bacterial transformation
+VCE Biology - Testing and diagnosing Huntington's disease
+VCE Biology - Treating Duchenne Muscular Dystrophy with CRISPR
+VCE Chemistry - HPLC Caffeine
+VCE Chemistry - HPLC Parabens
+VCE Chemistry - Sugar and Caffeine Analysis
+VCE Chemistry - Water testing
+VCE Physics - Hookes Law investigation
+Visual Arts
+VM Product design
+VM Safe workplaces
+Voyager - Automation and robotics
+Voyager - CAD
+Voyager - Criminal minds
+Voyager - Design and Prototype in 2D
+Voyager - Design and Prototype in 3D
+Voyager - Environmental design using Unreal Engine
+Voyager - Epidemiology
+Voyager - Fuelling creativity through AI
+Voyager - LED Lightbox
+Product Design and Technology
+Systems Engineering
+VCE Art - Art reimagined through technology
+VCE Art - Microscopic Art
+Bespoke Chemistry
+Discovery program
+Enterprise program - 2 day
+Enterprise program - 3 day
+Extended Investigation

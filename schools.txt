@@ -1,8 +1,42 @@
-Sydney Grammar School
-Melbourne High School
-Oakleigh Primary School
-Balwyn High School
-Crown Street Public School
-Albert Park Primary
-Centennial Park High
-Richmond Secondary College
+Alkira Secondary College
+Beaconhills College (Berwick)
+Beaconhills College (Pakenham)
+Berwick College
+Birranga College
+Casey Grammar School
+Cire Community School
+Clyde Secondary College
+Cranbourne East Secondary College
+Cranbourne Secondary College
+Cranbourne West Secondary College
+Doveton College
+Fountain Gate Secondary College
+Gleneagles Secondary College
+Haileybury  College
+Hallam Secondary College
+Hampton Park Secondary College
+Harkaway Hills College
+Home Education Network (HEN)
+Heritage College
+Hillcrest Christian College
+Ilim College (Doveton Campus)
+Kambrya College
+Lighthouse Christian College
+Lysterfield Lake College
+Lyndhurst Secondary College
+Maranatha Christian School
+Marnebek School Cranbourne
+Narre Warren South P-12 College
+Nossal High School
+Rivercrest Christian College
+St Francis Xavier (Berwick)
+St Francis Xavier (Beaconsfield)
+St Francis Xavier (Officer)
+St Margaret's Berwick Grammar (Berwick)
+St Margaret's Berwick Grammar (Officer)
+St Peter's College (Cranbourne)
+St Peter's College (Clyde North)
+Timbarra P-9 College
+Waverley Christian College (Narre Warren South)
+Wulerrp Secondary College 
+
