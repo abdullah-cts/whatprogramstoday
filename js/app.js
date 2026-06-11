@@ -87,6 +87,32 @@ function navigateToView() {
   }
 }
 
+async function hasScheduleToView() {
+  try {
+    const response = await fetch('/api/schedule');
+    if (response.ok) {
+      const data = await response.json();
+      if (Array.isArray(data.entries) && data.entries.length > 0) {
+        return true;
+      }
+    }
+  } catch (error) {
+    console.warn('Could not check server schedule:', error);
+  }
+
+  try {
+    const savedSchedule = localStorage.getItem('whatprogramstoday_schedule');
+    if (savedSchedule) {
+      const parsed = JSON.parse(savedSchedule);
+      return Array.isArray(parsed) && parsed.length > 0;
+    }
+  } catch (error) {
+    console.warn('Could not read cached schedule:', error);
+  }
+
+  return false;
+}
+
 // Returns today's date string in YYYY-MM-DD format using Sydney/Melbourne timezone
 function getSydneyDateString() {
   return new Intl.DateTimeFormat('en-CA', {
@@ -194,10 +220,10 @@ goToCreateBtn.addEventListener('click', () => {
   schoolInput.focus();
 });
 
-goToViewBtn.addEventListener('click', () => {
-  // Check if there is anything to view
-  const savedSchedule = localStorage.getItem('whatprogramstoday_schedule');
-  if (!savedSchedule || JSON.parse(savedSchedule).length === 0) {
+goToViewBtn.addEventListener('click', async () => {
+  const hasSchedule = await hasScheduleToView();
+
+  if (!hasSchedule) {
     showToast("No schedule published yet. Build one first!", "error");
     welcomeScreen.style.display = 'none';
     creatorScreen.style.display = 'block';
@@ -344,6 +370,7 @@ submitScheduleBtn.addEventListener('click', async () => {
       throw new Error(err.error || 'Publish failed');
     }
 
+    localStorage.setItem('whatprogramstoday_schedule', JSON.stringify(currentSchedule));
     showToast("Schedule published! Redirecting...", "info");
     setTimeout(() => navigateToView(), 1000);
 
