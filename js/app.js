@@ -87,6 +87,29 @@ function navigateToView() {
   }
 }
 
+function getScheduleStorageKey() {
+  return `whatprogramstoday_schedule_${getSydneyDateString()}`;
+}
+
+function saveCurrentScheduleToStorage() {
+  localStorage.setItem(getScheduleStorageKey(), JSON.stringify(currentSchedule));
+}
+
+function readStoredSchedule() {
+  try {
+    const savedSchedule = localStorage.getItem(getScheduleStorageKey());
+    if (!savedSchedule) {
+      return [];
+    }
+
+    const parsed = JSON.parse(savedSchedule);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    console.warn('Could not read saved schedule:', error);
+    return [];
+  }
+}
+
 async function hasScheduleToView() {
   try {
     const response = await fetch('/api/schedule');
@@ -100,14 +123,9 @@ async function hasScheduleToView() {
     console.warn('Could not check server schedule:', error);
   }
 
-  try {
-    const savedSchedule = localStorage.getItem('whatprogramstoday_schedule');
-    if (savedSchedule) {
-      const parsed = JSON.parse(savedSchedule);
-      return Array.isArray(parsed) && parsed.length > 0;
-    }
-  } catch (error) {
-    console.warn('Could not read cached schedule:', error);
+  const storedSchedule = readStoredSchedule();
+  if (storedSchedule.length > 0) {
+    return true;
   }
 
   return false;
@@ -269,6 +287,7 @@ function addEntryToSchedule() {
 
   // Re-render schedule list
   renderScheduleList();
+  saveCurrentScheduleToStorage();
 
   // Reset program selection
   programInput.value = '';
@@ -285,6 +304,7 @@ function addEntryToSchedule() {
 function removeEntryFromSchedule(index) {
   currentSchedule.splice(index, 1);
   renderScheduleList();
+  saveCurrentScheduleToStorage();
   showToast("Entry removed");
 }
 
@@ -370,7 +390,7 @@ submitScheduleBtn.addEventListener('click', async () => {
       throw new Error(err.error || 'Publish failed');
     }
 
-    localStorage.setItem('whatprogramstoday_schedule', JSON.stringify(currentSchedule));
+    saveCurrentScheduleToStorage();
     showToast("Schedule published! Redirecting...", "info");
     setTimeout(() => navigateToView(), 1000);
 
@@ -391,6 +411,14 @@ async function init() {
   setupDropdown(schoolCombobox, schoolInput, schoolDropdown, schoolsList);
   setupDropdown(programCombobox, programInput, programDropdown, programsList);
 
+  const storedSchedule = readStoredSchedule();
+  if (storedSchedule.length > 0) {
+    currentSchedule = storedSchedule;
+    renderScheduleList();
+    showToast("Resumed your latest schedule", "info");
+    return;
+  }
+
   // Try to resume today's schedule from the server so the builder can
   // pick up where it left off after a page refresh.
   // Silently ignored when running locally via file:// (no API available).
@@ -401,6 +429,7 @@ async function init() {
       if (data.entries && data.entries.length > 0) {
         currentSchedule = data.entries;
         renderScheduleList();
+        saveCurrentScheduleToStorage();
         showToast("Resumed today's saved schedule", "info");
       }
     }

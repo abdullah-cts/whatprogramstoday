@@ -67,6 +67,25 @@ function navigateToHome() {
   }
 }
 
+function getScheduleStorageKey() {
+  return `whatprogramstoday_schedule_${getSydneyDateString()}`;
+}
+
+function readStoredSchedule() {
+  try {
+    const savedSchedule = localStorage.getItem(getScheduleStorageKey());
+    if (!savedSchedule) {
+      return [];
+    }
+
+    const parsed = JSON.parse(savedSchedule);
+    return Array.isArray(parsed) ? parsed : [];
+  } catch (error) {
+    console.warn('Could not read saved schedule:', error);
+    return [];
+  }
+}
+
 viewBackBtn.addEventListener('click', navigateToHome);
 backToHomeLogo.addEventListener('click', (e) => {
   e.preventDefault();
@@ -185,7 +204,11 @@ async function init() {
   const urlParams = new URLSearchParams(window.location.search);
   const shareData = urlParams.get('s');
 
-  if (shareData) {
+  const storedSchedule = readStoredSchedule();
+  if (storedSchedule.length > 0) {
+    activeSchedule = storedSchedule;
+    showToast("Loaded your current schedule draft", "info");
+  } else if (shareData) {
     // Decode a legacy encoded share parameter
     try {
       const jsonString = decodeURIComponent(atob(shareData));
