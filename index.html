@@ -1,0 +1,146 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>whatprogramstoday - Schedule Builder</title>
+  <meta name="description"
+    content="Create and manage your school's daily program schedules beautifully. Built for Vercel.">
+  <link rel="stylesheet" href="css/style.css">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+
+<body>
+
+  <!-- App Header -->
+  <header>
+    <a href="#" class="logo-container" id="logo-link">
+      <div class="logo-icon">W</div>
+      <div class="logo-text">whatprogramstoday</div>
+    </a>
+  </header>
+
+  <!-- Content Container -->
+  <main class="container">
+
+    <!-- Screen 1: Welcome/Hub -->
+    <section class="welcome-screen" id="welcome-screen">
+      <h1 class="welcome-title">
+        Streamline Your <span>Daily Programs</span>
+      </h1>
+      <p class="welcome-subtitle">
+        Create beautiful, clear schedule boards optimised for large screens.
+      </p>
+
+      <div class="welcome-actions">
+        <button class="btn btn-primary" id="go-to-create-btn">
+          <i data-lucide="plus-circle"></i>
+          Create Today's Schedule
+        </button>
+        <button class="btn btn-secondary" id="go-to-view-btn">
+          <i data-lucide="monitor"></i>
+          View Today's Schedule
+        </button>
+      </div>
+    </section>
+
+    <!-- Screen 2: Creator Form -->
+    <section class="creator-screen" id="creator-screen">
+      <div class="screen-header">
+        <button class="back-btn" id="form-back-btn" title="Back to main hub">
+          <i data-lucide="arrow-left"></i>
+        </button>
+        <div>
+          <h2>Daily Schedule Builder</h2>
+          <p style="color: var(--text-secondary); font-size: 0.875rem;">Build the roster of schools and programs for
+            today.</p>
+        </div>
+      </div>
+
+      <div class="card-container">
+        <h3 class="form-title">Add Program Entry</h3>
+        <form id="entry-form" onsubmit="event.preventDefault();">
+
+          <div class="form-row">
+            <!-- School Name Selection -->
+            <div class="form-group">
+              <label class="form-label" for="school-input">School Name</label>
+              <div class="combobox-container" id="school-combobox">
+                <input type="text" id="school-input" class="input-field" placeholder="Search or type school name..."
+                  autocomplete="off" required>
+                <i data-lucide="chevron-down" class="combobox-arrow"></i>
+                <div class="combobox-dropdown" id="school-dropdown">
+                  <!-- JS will populate options here -->
+                </div>
+              </div>
+            </div>
+
+            <!-- Program Name Selection -->
+            <div class="form-group">
+              <label class="form-label" for="program-input">Program Name</label>
+              <div class="combobox-container" id="program-combobox">
+                <input type="text" id="program-input" class="input-field" placeholder="Search or type program name..."
+                  autocomplete="off" required>
+                <i data-lucide="chevron-down" class="combobox-arrow"></i>
+                <div class="combobox-dropdown" id="program-dropdown">
+                  <!-- JS will populate options here -->
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Creator Actions -->
+          <div class="creator-actions">
+            <button type="button" class="btn btn-secondary" id="add-more-btn">
+              <i data-lucide="plus"></i>
+              Add to Schedule
+            </button>
+            <button type="button" class="btn btn-primary" id="submit-schedule-btn">
+              <i data-lucide="check-circle-2"></i>
+              Publish & View
+            </button>
+          </div>
+
+        </form>
+
+        <!-- Current Schedule Preview -->
+        <div class="added-items-list" id="added-items-list" style="display: none;">
+          <h4 class="added-items-title">
+            Current Entries List
+            <span class="added-items-count" id="added-count">0</span>
+          </h4>
+          <div class="items-grid" id="added-items-grid">
+            <!-- Dynamic elements go here -->
+          </div>
+        </div>
+
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Theme Toggle Switch -->
+  <div class="theme-toggle-container">
+    <span class="theme-label" id="theme-text">Dark Mode</span>
+    <div class="switch-track" id="theme-switch" role="checkbox" aria-checked="false" tabindex="0">
+      <div class="switch-thumb"></div>
+    </div>
+  </div>
+
+  <!-- Toast for User Notification -->
+  <div class="toast" id="toast-notification">
+    <i data-lucide="info" id="toast-icon"></i>
+    <span id="toast-message">Notification message</span>
+  </div>
+
+  <!-- Application Logic -->
+  <script src="js/app.js"></script>
+  <script>
+    // Initialize Lucide icons on page load
+    lucide.createIcons();
+  </script>
+</body>
+
+</html>

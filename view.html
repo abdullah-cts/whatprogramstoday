@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>whatprogramstoday - Display Board</title>
+  <meta name="description" content="Large display board for today's school program schedules. Optimized for TVs and signages.">
+  <link rel="stylesheet" href="css/style.css">
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+</head>
+<body>
+
+  <!-- App Header -->
+  <header>
+    <a href="#" class="logo-container" id="back-to-home-logo">
+      <div class="logo-icon">W</div>
+      <div class="logo-text">whatprogramstoday</div>
+    </a>
+  </header>
+
+  <!-- Content Container -->
+  <main class="container">
+    
+    <!-- View Screen: Large signage board -->
+    <section class="view-screen">
+      <div class="view-header">
+        <div class="view-date-container">
+          <h1 class="view-day-title" id="display-day">Today is Wednesday</h1>
+        </div>
+      </div>
+
+      <!-- Grid container for school cards -->
+      <div class="cards-grid" id="cards-grid">
+        <!-- Rendered dynamically by JS -->
+      </div>
+    </section>
+
+  </main>
+
+  <!-- Floating Navigation Controls (Bottom Left) -->
+  <div class="floating-actions">
+    <button class="btn btn-secondary btn-utility" id="view-back-btn" title="Back to Builder">
+      <i data-lucide="arrow-left"></i>
+      Builder
+    </button>
+    <button class="btn btn-secondary btn-utility" id="share-url-btn" title="Copy shareable link for this display board">
+      <i data-lucide="share-2"></i>
+      Copy Share Link
+    </button>
+  </div>
+
+  <!-- Theme Toggle Switch (Bottom Right) -->
+  <div class="theme-toggle-container">
+    <span class="theme-label" id="theme-text">Dark Mode</span>
+    <div class="switch-track" id="theme-switch" role="checkbox" aria-checked="false" tabindex="0">
+      <div class="switch-thumb"></div>
+    </div>
+  </div>
+
+  <!-- Toast Notification -->
+  <div class="toast" id="toast-notification">
+    <i data-lucide="info" id="toast-icon"></i>
+    <span id="toast-message">Link copied to clipboard!</span>
+  </div>
+
+  <!-- View Logic -->
+  <script src="js/view.js"></script>
+  <script>
+    // Initialize Lucide icons on page load
+    lucide.createIcons();
+  </script>
+</body>
+</html>
