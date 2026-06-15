@@ -1,68 +1,86 @@
 # whatprogramstoday
 
-A lightweight, browser-based daily schedule board for schools. Staff can quickly build a roster of which programs are visiting which schools today, then display it as a clean, large-screen signage board — perfect for TVs and reception screens.
+A lightweight web app for building and displaying a daily school program schedule on a large screen. It is designed for schools and staff who want a clean, easy-to-read board for today’s visits and activities.
+
+## Recent updates
+
+The app now includes a more polished workflow for daily use:
+
+- A welcome/hub screen with clear actions for building or viewing today’s schedule
+- A separate display board view optimised for TVs and signage screens
+- A smoother builder flow with school and program comboboxes, custom entry support, and a live preview list
+- Password-protected publishing before schedules are stored
+- Cloud storage through Supabase, with one schedule per day and older schedules cleaned up automatically
+- Light/dark mode persistence and improved navigation between the builder and display views
 
 ## Features
 
-- **Schedule Builder** — Search or type a school name and program name, add multiple entries, and publish in one click.
-- **Display Board** — A full-screen view optimised for large monitors and signage screens, showing today's schedule as cards.
-- **Smart date handling** — Schedules are automatically reset each new day (based on the Australia/Sydney timezone), so you always start fresh.
-- **Custom entries** — Schools and programs not in the preset lists can be typed in freely.
-- **Shareable link** — Copy a share link from the display board to send to colleagues.
-- **Light / Dark mode** — Toggle between themes; preference is persisted in `localStorage`.
-- **Supabase-backed storage** — Published schedules are stored in a Supabase table so the display board can load the same data from Vercel.
+- Create a daily roster by adding school/program pairs
+- Use preset lists from schools.txt and programs.txt, or type custom entries directly
+- Preview the current schedule before publishing
+- Publish and view the schedule from one action
+- Display today's schedule as grouped cards on a large-screen view
+- Protect publishing with an optional password
+- Store schedules in Supabase and load them through a serverless API
+- Use Sydney timezone logic so each new day starts fresh automatically
 
-## Project Structure
+## Project structure
 
-```
+```text
 whatprogramstoday/
-├── index.html        # Schedule builder (home page)
-├── view.html         # Display board page
-├── vercel.json       # Vercel deployment config (clean URLs)
-├── schools.txt       # Preset list of school names (one per line)
-├── programs.txt      # Preset list of program names (one per line)
+├── index.html             # Builder/home experience
+├── view.html              # Large-screen display view
+├── vercel.json            # Vercel routing config
+├── package.json           # Project dependencies
+├── schools.txt            # Default school names (one per line)
+├── programs.txt           # Default program names (one per line)
 ├── css/
-│   └── style.css     # All styles (light + dark theme)
-└── js/
-    ├── app.js        # Builder logic, combobox dropdowns, localStorage management
-    └── view.js       # Display board rendering logic
+│   └── style.css          # App styling and theme support
+├── js/
+│   ├── app.js             # Builder workflow, comboboxes, publishing logic
+│   └── view.js            # Display board rendering logic
+└── api/
+    └── schedule.js        # Vercel serverless API for reading/writing schedules
 ```
 
-## Customising Schools & Programs
+## Customising schools and programs
 
-Edit `schools.txt` and `programs.txt` to match your organisation's schools and programs. Each entry goes on its own line:
+Edit schools.txt and programs.txt to match your organisation’s names. Each entry should be on its own line.
 
-```
+```text
 # schools.txt
 Sydney Grammar School
 Melbourne High School
 Albert Park Primary
 ```
 
-```
+```text
 # programs.txt
 Science Camp
 Robotics Workshop
 Coding Bootcamp
 ```
 
-Users can also type any custom name directly in the form — it doesn't have to appear in either list.
+Users can also enter custom values directly in the form if they are not already in the lists.
 
-## Deployment
+## Configuration
 
-The project is a static site with serverless API routes (for Supabase) and requires no build step.
+This project uses Vercel Serverless Functions and Supabase for storage.
 
-### Environment Variables
+### Required environment variables
 
-Three variables are required. Set them in Vercel and in a local `.env` file (see `.env.example`):
+Set these in Vercel and in a local .env file:
 
-| Variable | Where to find it |
+| Variable | Purpose |
 |---|---|
-| `SUPABASE_URL` | Supabase project → Project Settings → API |
-| `SUPABASE_SERVICE_ROLE_KEY` | Supabase project → Project Settings → API → service_role key |
-| `SUPABASE_TABLE` | Optional table name; defaults to `whatprogramstoday_schedules` |
+| SUPABASE_URL | Your Supabase project URL |
+| SUPABASE_SERVICE_ROLE_KEY | Supabase service role key |
+| SUPABASE_TABLE | Optional table name; defaults to whatprogramstoday_schedules |
+| SCHEDULE_PASSWORD | Optional password required before publishing |
 
-Create a table in Supabase before publishing for the first time:
+### Supabase table
+
+Create a table before first use:
 
 ```sql
 create table public.whatprogramstoday_schedules (
@@ -73,42 +91,49 @@ create table public.whatprogramstoday_schedules (
 );
 ```
 
-> **Never commit your `.env` file.** Add it to `.gitignore`.
+> Never commit your .env file.
+
+## Deployment
+
+The app is designed to run as a static site with serverless API routes and requires no build step.
 
 ### Vercel (recommended)
 
 1. Push the repository to GitHub.
-2. Import the repo in [Vercel](https://vercel.com).
-3. Deploy — no build command or output directory needed.
+2. Import it in Vercel.
+3. Deploy with no build command or output directory needed.
 
-The `vercel.json` enables clean URLs so `/view` serves `view.html` without the `.html` extension.
+The vercel.json config enables clean URLs so /view serves view.html without the .html extension.
 
 ### Local development
 
-The schedule API uses Vercel Serverless Functions, so you need the **Vercel CLI** for full local testing:
+Install the Vercel CLI and run the app locally:
 
 ```bash
-npm i -g vercel
+npm install
+npm install -g vercel
 vercel dev
 ```
 
-This starts a local server at `http://localhost:3000` with the API routes wired up. Make sure your `.env` file has the Supabase credentials.
+Then open http://localhost:3000.
 
-> **Note:** `schools.txt` / `programs.txt` are fetched via HTTP, so they'll load correctly under `vercel dev`. Opening as a `file://` URL will fall back to built-in default lists (and the API will be unavailable).
+> schools.txt and programs.txt are fetched over HTTP, so they load correctly under vercel dev. Opening the app as a file:// URL will fall back to built-in defaults, and the API will not be available.
 
-## How It Works
+## How it works
 
-1. **Build** — Open the home page, click **Create Today's Schedule**, then add school + program pairs.
-2. **Publish** — Click **Publish & View**. The schedule is saved to your Supabase table for today's date.
-3. **Display** — The display board reads from the Supabase-backed API and renders each entry as a card. Share the URL for others on the same network to view.
-4. **Next day** — On the next day the app detects the date change and loads a fresh schedule automatically.
+1. Open the home page and choose Create Today’s Schedule.
+2. Add school and program pairs, then review them in the preview list.
+3. Click Publish & View to save the schedule for today and open the display board.
+4. The display view reads the published schedule from the API and renders grouped cards for each school.
+5. On the next day, the app automatically works with a fresh schedule based on Sydney time.
 
-## Tech Stack
+## Tech stack
 
 | Layer | Technology |
 |---|---|
 | Markup | HTML5 |
-| Styles | Vanilla CSS (custom properties for theming) |
+| Styles | Vanilla CSS with custom properties |
 | Logic | Vanilla JavaScript (ES2020+) |
-| Icons | [Lucide](https://lucide.dev) (via CDN) |
+| Icons | Lucide via CDN |
 | Hosting | Vercel |
+| Storage | Supabase |
