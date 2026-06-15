@@ -22,6 +22,12 @@ const programDropdown = document.getElementById('program-dropdown');
 const addMoreBtn = document.getElementById('add-more-btn');
 const submitScheduleBtn = document.getElementById('submit-schedule-btn');
 
+const passwordModal = document.getElementById('password-modal');
+const passwordModalInput = document.getElementById('publish-password-input');
+const passwordModalError = document.getElementById('password-modal-error');
+const passwordModalCancelBtn = document.getElementById('password-modal-cancel-btn');
+const passwordModalSubmitBtn = document.getElementById('password-modal-submit-btn');
+
 const addedItemsList = document.getElementById('added-items-list');
 const addedItemsGrid = document.getElementById('added-items-grid');
 const addedCount = document.getElementById('added-count');
@@ -317,7 +323,51 @@ addMoreBtn.addEventListener('click', () => {
   addEntryToSchedule();
 });
 
-// Form submit action (Publish & Redirect)
+function setPublishButtonBusy(isBusy) {
+  submitScheduleBtn.disabled = isBusy;
+  submitScheduleBtn.innerHTML = isBusy
+    ? `<i data-lucide="loader-2"></i> Publishing...`
+    : `<i data-lucide="check-circle-2"></i> Publish &amp; View`;
+  lucide.createIcons();
+}
+
+function openPasswordModal() {
+  if (!passwordModal) {
+    return;
+  }
+
+  passwordModal.classList.remove('is-hidden');
+  passwordModal.setAttribute('aria-hidden', 'false');
+  passwordModalError.textContent = '';
+  passwordModalInput.value = '';
+  passwordModalInput.focus();
+}
+
+function closePasswordModal() {
+  if (!passwordModal) {
+    return;
+  }
+
+  passwordModal.classList.add('is-hidden');
+  passwordModal.setAttribute('aria-hidden', 'true');
+  passwordModalError.textContent = '';
+  passwordModalInput.value = '';
+}
+
+function setPasswordModalBusy(isBusy) {
+  passwordModalSubmitBtn.disabled = isBusy;
+  passwordModalSubmitBtn.innerHTML = isBusy
+    ? '<i data-lucide="loader-2"></i> Publishing...'
+    : 'Publish';
+  lucide.createIcons();
+}
+
+function showPasswordModalError(message) {
+  if (passwordModalError) {
+    passwordModalError.textContent = message;
+  }
+}
+
 submitScheduleBtn.addEventListener('click', async () => {
   // If user has filled the inputs but hasn't clicked "Add to Schedule" yet,
   // we auto-add it so they don't lose that entry!
@@ -337,21 +387,28 @@ submitScheduleBtn.addEventListener('click', async () => {
     return;
   }
 
-  // Show loading state on button
-  submitScheduleBtn.disabled = true;
-  submitScheduleBtn.innerHTML = `<i data-lucide="loader-2"></i> Publishing...`;
-  lucide.createIcons();
+  openPasswordModal();
+});
 
-  const password = window.prompt('Enter the publishing password to publish today\'s schedule');
-  if (password === null) {
-    submitScheduleBtn.disabled = false;
-    submitScheduleBtn.innerHTML = `<i data-lucide="check-circle-2"></i> Publish &amp; View`;
-    lucide.createIcons();
+passwordModalCancelBtn?.addEventListener('click', closePasswordModal);
+passwordModal?.addEventListener('click', (event) => {
+  if (event.target === passwordModal) {
+    closePasswordModal();
+  }
+});
+
+passwordModalSubmitBtn?.addEventListener('click', async () => {
+  const password = passwordModalInput.value;
+
+  if (!password) {
+    showPasswordModalError('Please enter the publishing password.');
     return;
   }
 
+  setPublishButtonBusy(true);
+  setPasswordModalBusy(true);
+
   try {
-    // POST schedule to the Supabase-backed API
     const response = await fetch('/api/schedule', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -367,30 +424,22 @@ submitScheduleBtn.addEventListener('click', async () => {
       throw new Error(err.error || 'Publish failed');
     }
 
-    //showToast("Schedule published! Redirecting...", "info");
+    closePasswordModal();
     setTimeout(() => navigateToView(), 800);
-
   } catch (error) {
     console.error('Publish error:', error);
-    //showToast(error.message || "Could not publish. Check your connection and try again.", "error");
-    // Restore button
-    submitScheduleBtn.disabled = false;
-    submitScheduleBtn.innerHTML = `<i data-lucide="check-circle-2"></i> Publish &amp; View`;
-    lucide.createIcons();
+    showPasswordModalError(error.message || 'Could not publish. Check your connection and try again.');
+    setPublishButtonBusy(false);
+    setPasswordModalBusy(false);
   }
 });
 
 // App Initialization
 async function init() {
   initTheme();
-
-  const hasSchedule = await hasScheduleToView();
-  if (hasSchedule) {
-    navigateToView();
-    return;
-  }
-
   await loadSourceData();
+  setupDropdown(schoolCombobox, schoolInput, schoolDropdown, schoolsList);
+  setupDropdown(programCombobox, programInput, programDropdown, programsList);
   setupDropdown(schoolCombobox, schoolInput, schoolDropdown, schoolsList);
   setupDropdown(programCombobox, programInput, programDropdown, programsList);
 

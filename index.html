@@ -135,6 +135,20 @@
     <span id="toast-message">Notification message</span>
   </div> -->
 
+  <div class="modal-overlay is-hidden" id="password-modal" aria-hidden="true">
+    <div class="modal-card" role="dialog" aria-modal="true" aria-labelledby="password-modal-title">
+      <h3 class="modal-title" id="password-modal-title">Publishing Password</h3>
+      <p class="modal-subtitle">Enter the password to publish today's schedule.</p>
+      <label class="form-label" for="publish-password-input">Password</label>
+      <input type="password" id="publish-password-input" class="input-field" autocomplete="current-password" />
+      <p class="modal-error" id="password-modal-error"></p>
+      <div class="modal-actions">
+        <button type="button" class="btn btn-secondary" id="password-modal-cancel-btn">Cancel</button>
+        <button type="button" class="btn btn-primary" id="password-modal-submit-btn">Publish</button>
+      </div>
+    </div>
+  </div>
+
   <!-- Application Logic -->
   <script src="js/app.js"></script>
   <script>
