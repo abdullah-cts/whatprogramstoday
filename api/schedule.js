@@ -125,6 +125,10 @@ async function writeScheduleByDate(date, entries) {
     throw pruneError;
   }
 
+  if (entries.length === 0) {
+    return;
+  }
+
   const { error: insertError } = await supabase
     .from(tableName)
     .insert({ date, entries });
@@ -164,10 +168,6 @@ module.exports = async function handler(req, res) {
 
       if (!date || !Array.isArray(entries)) {
         return res.status(400).json({ error: 'Invalid request. Expected { date, entries[] }.' });
-      }
-
-      if (entries.length === 0) {
-        return res.status(400).json({ error: 'Cannot publish an empty schedule.' });
       }
 
       if (!verifyPublishingPassword(password)) {

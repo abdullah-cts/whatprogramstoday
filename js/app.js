@@ -382,11 +382,6 @@ submitScheduleBtn.addEventListener('click', async () => {
     });
   }
 
-  if (currentSchedule.length === 0) {
-    //showToast("Please add at least one program to the schedule", "error");
-    return;
-  }
-
   openPasswordModal();
 });
 
@@ -394,6 +389,13 @@ passwordModalCancelBtn?.addEventListener('click', closePasswordModal);
 passwordModal?.addEventListener('click', (event) => {
   if (event.target === passwordModal) {
     closePasswordModal();
+  }
+});
+
+passwordModalInput?.addEventListener('keydown', (event) => {
+  if (event.key === 'Enter') {
+    event.preventDefault();
+    passwordModalSubmitBtn?.click();
   }
 });
 

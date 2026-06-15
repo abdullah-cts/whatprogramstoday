@@ -137,7 +137,7 @@ header {
 }
 
 .logo-icon {
-  width: 2.75rem;
+  width: 3rem;
   height: 2.75rem;
   margin: 0.25rem 0.5rem 0.25rem 0;
   padding: 0.3rem;
@@ -828,6 +828,11 @@ header {
   border-radius: 1.25rem;
   padding: 1.5rem;
   box-shadow: var(--card-shadow);
+}
+
+.modal-card .form-label {
+  margin-top: 0.25rem;
+  margin-bottom: 0.5rem;
 }
 
 .modal-title {
