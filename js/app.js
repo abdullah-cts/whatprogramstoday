@@ -54,7 +54,7 @@ themeSwitch.addEventListener('click', () => {
   document.documentElement.setAttribute('data-theme', newTheme);
   localStorage.setItem('whatprogramstoday_theme', newTheme);
   updateThemeSwitchUI(newTheme);
-  showToast(`Switched to ${newTheme} theme`, 'info');
+  //showToast(`Switched to ${newTheme} theme`, 'info');
 });
 
 // Toast notification helper
@@ -87,45 +87,15 @@ function navigateToView() {
   }
 }
 
-function getScheduleStorageKey() {
-  return `whatprogramstoday_schedule_${getSydneyDateString()}`;
-}
-
-function saveCurrentScheduleToStorage() {
-  localStorage.setItem(getScheduleStorageKey(), JSON.stringify(currentSchedule));
-}
-
-function readStoredSchedule() {
-  try {
-    const savedSchedule = localStorage.getItem(getScheduleStorageKey());
-    if (!savedSchedule) {
-      return [];
-    }
-
-    const parsed = JSON.parse(savedSchedule);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch (error) {
-    console.warn('Could not read saved schedule:', error);
-    return [];
-  }
-}
-
 async function hasScheduleToView() {
   try {
     const response = await fetch('/api/schedule');
     if (response.ok) {
       const data = await response.json();
-      if (Array.isArray(data.entries) && data.entries.length > 0) {
-        return true;
-      }
+      return Array.isArray(data.entries) && data.entries.length > 0;
     }
   } catch (error) {
     console.warn('Could not check server schedule:', error);
-  }
-
-  const storedSchedule = readStoredSchedule();
-  if (storedSchedule.length > 0) {
-    return true;
   }
 
   return false;
@@ -150,7 +120,7 @@ async function loadSourceData() {
       schoolsList = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
     } else {
       console.warn('Could not load schools.txt. Using defaults.');
-      schoolsList = ['Sydney Public School', 'Melbourne Grammar', 'Albert Park Primary'];
+      schoolsList = ['Alkira Secondary College', 'Beaconhills College', 'Clyde Secondary College'];
     }
 
     const programsResponse = await fetch('programs.txt');
@@ -159,13 +129,13 @@ async function loadSourceData() {
       programsList = text.split('\n').map(line => line.trim()).filter(line => line.length > 0);
     } else {
       console.warn('Could not load programs.txt. Using defaults.');
-      programsList = ['Science Camp', 'Robotics Workshop', 'Coding Bootcamp'];
+      programsList = ['Discovery', 'Enterprise', 'Voyager'];
     }
   } catch (error) {
     console.error('Error fetching source data:', error);
     // Safe fallbacks
-    schoolsList = ['Sydney Grammar School', 'Melbourne High School', 'Oakleigh Primary School'];
-    programsList = ['Science Camp', 'Robotics Workshop', 'Coding Bootcamp'];
+    schoolsList = ['Alkira Secondary College', 'Beaconhills College', 'Clyde Secondary College'];
+    programsList = ['Discovery', 'Enterprise', 'Voyager'];
   }
 }
 
@@ -242,7 +212,7 @@ goToViewBtn.addEventListener('click', async () => {
   const hasSchedule = await hasScheduleToView();
 
   if (!hasSchedule) {
-    showToast("No schedule published yet. Build one first!", "error");
+    //showToast("No schedule published yet. Build one first!", "error");
     welcomeScreen.style.display = 'none';
     creatorScreen.style.display = 'block';
     schoolInput.focus();
@@ -268,13 +238,13 @@ function addEntryToSchedule() {
   const programVal = programInput.value.trim();
 
   if (!schoolVal) {
-    showToast("Please select or enter a School Name", "error");
+    //showToast("Please select or enter a School Name", "error");
     schoolInput.focus();
     return false;
   }
 
   if (!programVal) {
-    showToast("Please select or enter a Program Name", "error");
+    //showToast("Please select or enter a Program Name", "error");
     programInput.focus();
     return false;
   }
@@ -287,7 +257,6 @@ function addEntryToSchedule() {
 
   // Re-render schedule list
   renderScheduleList();
-  saveCurrentScheduleToStorage();
 
   // Reset program selection
   programInput.value = '';
@@ -296,7 +265,7 @@ function addEntryToSchedule() {
   // So we DO NOT clear the schoolInput, it remains defaulted to the last selected school name.
   
   programInput.focus();
-  showToast("Added entry successfully!");
+  //showToast("Added entry successfully!");
   return true;
 }
 
@@ -304,8 +273,7 @@ function addEntryToSchedule() {
 function removeEntryFromSchedule(index) {
   currentSchedule.splice(index, 1);
   renderScheduleList();
-  saveCurrentScheduleToStorage();
-  showToast("Entry removed");
+  //showToast("Entry removed");
 }
 
 // Render schedule list in creator screen
@@ -365,7 +333,7 @@ submitScheduleBtn.addEventListener('click', async () => {
   }
 
   if (currentSchedule.length === 0) {
-    showToast("Please add at least one program to the schedule", "error");
+    //showToast("Please add at least one program to the schedule", "error");
     return;
   }
 
@@ -374,6 +342,14 @@ submitScheduleBtn.addEventListener('click', async () => {
   submitScheduleBtn.innerHTML = `<i data-lucide="loader-2"></i> Publishing...`;
   lucide.createIcons();
 
+  const password = window.prompt('Enter the publishing password to publish today\'s schedule');
+  if (password === null) {
+    submitScheduleBtn.disabled = false;
+    submitScheduleBtn.innerHTML = `<i data-lucide="check-circle-2"></i> Publish &amp; View`;
+    lucide.createIcons();
+    return;
+  }
+
   try {
     // POST schedule to the Supabase-backed API
     const response = await fetch('/api/schedule', {
@@ -381,7 +357,8 @@ submitScheduleBtn.addEventListener('click', async () => {
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         date: getSydneyDateString(),
-        entries: currentSchedule
+        entries: currentSchedule,
+        password
       })
     });
 
@@ -390,13 +367,12 @@ submitScheduleBtn.addEventListener('click', async () => {
       throw new Error(err.error || 'Publish failed');
     }
 
-    saveCurrentScheduleToStorage();
-    showToast("Schedule published! Redirecting...", "info");
-    setTimeout(() => navigateToView(), 1000);
+    //showToast("Schedule published! Redirecting...", "info");
+    setTimeout(() => navigateToView(), 800);
 
   } catch (error) {
     console.error('Publish error:', error);
-    showToast(error.message || "Could not publish. Check your connection and try again.", "error");
+    //showToast(error.message || "Could not publish. Check your connection and try again.", "error");
     // Restore button
     submitScheduleBtn.disabled = false;
     submitScheduleBtn.innerHTML = `<i data-lucide="check-circle-2"></i> Publish &amp; View`;
@@ -407,21 +383,17 @@ submitScheduleBtn.addEventListener('click', async () => {
 // App Initialization
 async function init() {
   initTheme();
+
+  const hasSchedule = await hasScheduleToView();
+  if (hasSchedule) {
+    navigateToView();
+    return;
+  }
+
   await loadSourceData();
   setupDropdown(schoolCombobox, schoolInput, schoolDropdown, schoolsList);
   setupDropdown(programCombobox, programInput, programDropdown, programsList);
 
-  const storedSchedule = readStoredSchedule();
-  if (storedSchedule.length > 0) {
-    currentSchedule = storedSchedule;
-    renderScheduleList();
-    showToast("Resumed your latest schedule", "info");
-    return;
-  }
-
-  // Try to resume today's schedule from the server so the builder can
-  // pick up where it left off after a page refresh.
-  // Silently ignored when running locally via file:// (no API available).
   try {
     const response = await fetch('/api/schedule');
     if (response.ok) {
@@ -429,8 +401,6 @@ async function init() {
       if (data.entries && data.entries.length > 0) {
         currentSchedule = data.entries;
         renderScheduleList();
-        saveCurrentScheduleToStorage();
-        showToast("Resumed today's saved schedule", "info");
       }
     }
   } catch (e) {

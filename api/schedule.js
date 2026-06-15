@@ -6,6 +6,7 @@
 // POST /api/schedule  → body: { date, entries }
 //                       saves schedule to Supabase.
 
+const crypto = require('crypto');
 const { createClient } = require('@supabase/supabase-js');
 
 const supabaseUrl = process.env.SUPABASE_URL;
@@ -37,6 +38,42 @@ function getSupabaseConfigError() {
   }
 
   return null;
+}
+
+function verifyPublishingPassword(providedPassword) {
+  const configuredPassword = process.env.SCHEDULE_PASSWORD;
+
+  if (!configuredPassword) {
+    return true;
+  }
+
+  if (typeof providedPassword !== 'string' || providedPassword.length === 0) {
+    return false;
+  }
+
+  const expectedBuffer = Buffer.from(configuredPassword);
+  const providedBuffer = Buffer.from(providedPassword);
+
+  if (expectedBuffer.length !== providedBuffer.length) {
+    return false;
+  }
+
+  return crypto.timingSafeEqual(expectedBuffer, providedBuffer);
+}
+
+async function pruneSchedulesExceptDate(date) {
+  if (!supabase) {
+    throw new Error(getSupabaseConfigError());
+  }
+
+  const { error } = await supabase
+    .from(tableName)
+    .delete()
+    .neq('date', date);
+
+  if (error) {
+    throw error;
+  }
 }
 
 async function readScheduleByDate(date) {
@@ -79,6 +116,15 @@ async function writeScheduleByDate(date, entries) {
     throw deleteError;
   }
 
+  const { error: pruneError } = await supabase
+    .from(tableName)
+    .delete()
+    .neq('date', date);
+
+  if (pruneError) {
+    throw pruneError;
+  }
+
   const { error: insertError } = await supabase
     .from(tableName)
     .insert({ date, entries });
@@ -102,6 +148,7 @@ module.exports = async function handler(req, res) {
   if (req.method === 'GET') {
     try {
       const todayDate = getSydneyDateString();
+      await pruneSchedulesExceptDate(todayDate);
       const stored = await readScheduleByDate(todayDate);
       return res.status(200).json(stored);
     } catch (error) {
@@ -113,7 +160,7 @@ module.exports = async function handler(req, res) {
   // ── POST ──────────────────────────────────────────────────────────────────
   if (req.method === 'POST') {
     try {
-      const { date, entries } = req.body;
+      const { date, entries, password } = req.body;
 
       if (!date || !Array.isArray(entries)) {
         return res.status(400).json({ error: 'Invalid request. Expected { date, entries[] }.' });
@@ -121,6 +168,10 @@ module.exports = async function handler(req, res) {
 
       if (entries.length === 0) {
         return res.status(400).json({ error: 'Cannot publish an empty schedule.' });
+      }
+
+      if (!verifyPublishingPassword(password)) {
+        return res.status(401).json({ error: 'Incorrect publishing password.' });
       }
 
       await writeScheduleByDate(date, entries);

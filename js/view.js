@@ -35,7 +35,7 @@ themeSwitch.addEventListener('click', () => {
   document.documentElement.setAttribute('data-theme', newTheme);
   localStorage.setItem('whatprogramstoday_theme', newTheme);
   updateThemeSwitchUI(newTheme);
-  showToast(`Switched to ${newTheme} theme`, 'info');
+ //showToast(`Switched to ${newTheme} theme`, 'info');
 });
 
 // Toast Helper
@@ -64,25 +64,6 @@ function navigateToHome() {
     window.location.href = 'index.html';
   } else {
     window.location.href = '/';
-  }
-}
-
-function getScheduleStorageKey() {
-  return `whatprogramstoday_schedule_${getSydneyDateString()}`;
-}
-
-function readStoredSchedule() {
-  try {
-    const savedSchedule = localStorage.getItem(getScheduleStorageKey());
-    if (!savedSchedule) {
-      return [];
-    }
-
-    const parsed = JSON.parse(savedSchedule);
-    return Array.isArray(parsed) ? parsed : [];
-  } catch (error) {
-    console.warn('Could not read saved schedule:', error);
-    return [];
   }
 }
 
@@ -189,7 +170,7 @@ async function loadFromAPI() {
   } catch (error) {
     console.error('Failed to load schedule from API:', error);
     activeSchedule = [];
-    showToast("Could not load schedule from server.", "error");
+    //showToast("Could not load schedule from server.", "error");
   }
 }
 
@@ -204,21 +185,9 @@ async function init() {
   const urlParams = new URLSearchParams(window.location.search);
   const shareData = urlParams.get('s');
 
-  const storedSchedule = readStoredSchedule();
-  if (storedSchedule.length > 0) {
-    activeSchedule = storedSchedule;
-    showToast("Loaded your current schedule draft", "info");
-  } else if (shareData) {
-    // Decode a legacy encoded share parameter
-    try {
-      const jsonString = decodeURIComponent(atob(shareData));
-      activeSchedule = JSON.parse(jsonString);
-      showToast("Loaded shared schedule!");
-    } catch (e) {
-      console.error('Failed to parse shared URL schedule data:', e);
-      showToast("Shared link was invalid. Loading saved schedule instead.", "error");
-      await loadFromAPI();
-    }
+  if (shareData) {
+    // Legacy share parameter is no longer used; load from the server instead.
+    await loadFromAPI();
   } else {
     await loadFromAPI();
   }
