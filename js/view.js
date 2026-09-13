@@ -99,6 +99,7 @@ function updateLocalTime() {
 // Group programs by school and render cards
 function processAndRenderSchedule() {
   cardsGrid.innerHTML = '';
+  cardsGrid.className = 'cards-grid';
 
   if (activeSchedule.length === 0) {
     renderEmptyState();
@@ -121,8 +122,11 @@ function processAndRenderSchedule() {
     }
   });
 
+  const schoolNames = Object.keys(groupedBySchool);
+  cardsGrid.classList.add(`cards-count-${Math.min(schoolNames.length, 4)}`);
+
   // Render cards for each school group
-  Object.keys(groupedBySchool).forEach(schoolName => {
+  schoolNames.forEach(schoolName => {
     const programs = groupedBySchool[schoolName];
     
     const card = document.createElement('div');
