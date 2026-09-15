@@ -618,7 +618,7 @@ header {
 
 .cards-grid.cards-count-2 {
   grid-template-rows: auto;
-  align-items: center;
+  align-items: stretch;
 }
 
 .program-card {
