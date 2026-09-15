@@ -617,7 +617,8 @@ header {
 }
 
 .cards-grid.cards-count-2 {
-  grid-template-rows: minmax(0, 1fr);
+  grid-template-rows: auto;
+  align-items: center;
 }
 
 .program-card {
